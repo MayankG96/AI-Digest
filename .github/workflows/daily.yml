@@ -2,7 +2,7 @@ name: Daily AI Digest
 
 on:
   schedule:
-    - cron: '0 14 * * *'   # 6:00 AM PST (UTC-8)
+    - cron: '0 13 * * *'   # 6:00 AM PDT (UTC-7)
   workflow_dispatch:        # allows manual trigger from GitHub UI
 
 jobs:
