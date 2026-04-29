@@ -2,5 +2,5 @@ feedparser
 requests
 langchain-core
 langchain-community
-langchain-openai
+langchain-google-genai
 python-dotenv

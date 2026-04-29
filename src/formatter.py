@@ -5,6 +5,8 @@ Uses inline CSS only (Gmail strips <style> tags).
 
 from __future__ import annotations
 
+from datetime import datetime, timezone
+
 
 def build_email_html(items: list[dict], date_str: str) -> str:
     """
@@ -29,8 +31,15 @@ def build_email_html(items: list[dict], date_str: str) -> str:
         rank = item.get("rank", idx + 1)
         title = _esc(item.get("title", "Untitled"))
         source = _esc(item.get("source", "Unknown"))
-        url = _esc(item.get("url", "#"))
+        url = item.get("url", "#")
+        url_esc = _esc(url)
         score = item.get("score", "")
+        published = item.get("published")
+        timestamp = (
+            published.strftime("%-d %b %Y, %-I:%M %p UTC")
+            if isinstance(published, datetime)
+            else ""
+        )
         summary = _esc(item.get("summary", ""))
         why = _esc(item.get("why_it_matters", ""))
 
@@ -62,15 +71,17 @@ def build_email_html(items: list[dict], date_str: str) -> str:
                                letter-spacing:0.04em;">{num_label}</span>
                 </td>
                 <td style="vertical-align:top;padding-right:12px;">
-                  <a href="{url}"
+                  <a href="{url_esc}"
                      style="font-size:17px;font-weight:700;color:#0a0a0f;
                             text-decoration:none;line-height:1.35;display:block;">
                     {title}
                   </a>
                   <div style="margin-top:4px;">
-                    <span style="font-family:'SF Mono','Fira Code',monospace;
-                                 font-size:10px;color:#888;text-transform:uppercase;
-                                 letter-spacing:0.08em;">{source}</span>
+                    <a href="{url_esc}"
+                       style="font-family:'SF Mono','Fira Code',monospace;
+                              font-size:10px;color:#1a56ff;text-transform:uppercase;
+                              letter-spacing:0.08em;text-decoration:none;">{source}</a>
+                    {_timestamp_html(timestamp)}
                   </div>
                 </td>
                 <td style="vertical-align:top;white-space:nowrap;">
@@ -198,6 +209,13 @@ def build_email_html(items: list[dict], date_str: str) -> str:
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
+def _timestamp_html(timestamp: str) -> str:
+    if not timestamp:
+        return ""
+    style = "font-family:'SF Mono','Fira Code',monospace;font-size:10px;color:#aaa;"
+    return f'&nbsp;&middot;&nbsp;<span style="{style}">{_esc(timestamp)}</span>'
+
 
 def _esc(text: str) -> str:
     """Minimal HTML escaping for safe inline insertion."""

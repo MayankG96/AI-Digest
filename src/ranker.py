@@ -1,5 +1,5 @@
 """
-ranker.py — Uses an LLM (Grok via LangChain) to rank and summarize news items.
+ranker.py — Uses an LLM (Gemini via LangChain) to rank and summarize news items.
 Returns the top 7 most significant AI stories.
 """
 
@@ -8,19 +8,18 @@ import logging
 import os
 
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_openai import ChatOpenAI
+from langchain_google_genai import ChatGoogleGenerativeAI
 
 logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
-# LLM setup (Grok-3-mini via xAI API, OpenAI-compatible)
+# LLM setup (Gemini 1.5 Flash via Google AI)
 # ---------------------------------------------------------------------------
 
-def _get_llm() -> ChatOpenAI:
-    return ChatOpenAI(
-        model="grok-3-mini",
-        openai_api_key=os.environ["GROK_API_KEY"],
-        openai_api_base="https://api.x.ai/v1",
+def _get_llm() -> ChatGoogleGenerativeAI:
+    return ChatGoogleGenerativeAI(
+        model="gemini-2.5-flash",
+        google_api_key=os.environ["GEMINI_API_KEY"],
         temperature=0.3,
     )
 
