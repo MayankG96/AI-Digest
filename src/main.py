@@ -41,6 +41,7 @@ def main() -> None:
     today = datetime.now(tz=timezone.utc)
     today_date = today.strftime("%B %d, %Y")          # e.g. "April 28, 2026"
     today_full = today.strftime("%A, %B %d, %Y")      # e.g. "Monday, April 28, 2026"
+    today_iso = today.strftime("%Y-%m-%d")            # e.g. "2026-04-28" — used for Supabase
 
     logger.info("=== AI News Digest — %s ===", today_date)
 
@@ -109,6 +110,25 @@ def main() -> None:
         sys.exit(1)
 
     print("Digest sent successfully.")
+
+    # ------------------------------------------------------------------
+    # 6. Send Telegram notification (immediately after email)
+    # ------------------------------------------------------------------
+    try:
+        from notifier import send_telegram_notification
+        send_telegram_notification()
+    except Exception as exc:
+        logger.error("Step 6 failed — could not send Telegram notification: %s", exc)
+
+    # ------------------------------------------------------------------
+    # 7. Save digest to Supabase
+    # ------------------------------------------------------------------
+    try:
+        from storage import save_digest
+        save_digest(ranked_items, today_iso)
+    except Exception as exc:
+        logger.error("Step 7 failed — could not save digest to Supabase: %s", exc)
+
     logger.info("=== Pipeline complete ===")
 
 
