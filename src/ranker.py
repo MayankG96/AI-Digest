@@ -82,16 +82,23 @@ def _build_numbered_block(items: list[dict]) -> str:
     return "\n".join(lines)
 
 
-def _merge_url(ranked_items: list[dict], original_items: list[dict]) -> list[dict]:
+def _merge_original_fields(ranked_items: list[dict], original_items: list[dict]) -> list[dict]:
     """
-    Ensure ranked items carry the correct URL from the original list.
-    The LLM may echo back the URL or omit it; this fills in gaps by title match.
+    Always override url and published on ranked items with values from the
+    original fetched data. The LLM frequently returns wrong or hallucinated
+    URLs, so we never trust its url field.
     """
-    title_to_url = {item["title"].strip().lower(): item.get("url", "") for item in original_items}
+    title_to_item = {item["title"].strip().lower(): item for item in original_items}
     for ranked in ranked_items:
-        if not ranked.get("url"):
-            key = ranked.get("title", "").strip().lower()
-            ranked["url"] = title_to_url.get(key, "")
+        key = ranked.get("title", "").strip().lower()
+        original = title_to_item.get(key)
+        if original:
+            ranked["url"] = original.get("url", ranked.get("url", "#"))
+            ranked["published"] = original.get("published")
+        else:
+            # Fallback: keep LLM url if no title match found
+            ranked.setdefault("url", "#")
+            ranked.setdefault("published", None)
     return ranked_items
 
 
@@ -144,8 +151,8 @@ def rank_and_summarize(items: list[dict]) -> list[dict]:
             f"with {len(ranked) if isinstance(ranked, list) else '?'} elements."
         )
 
-    # Patch missing URLs from the original data
-    ranked = _merge_url(ranked, items)
+    # Always patch url and published from original fetched data
+    ranked = _merge_original_fields(ranked, items)
 
     logger.info(
         "Top 7 ranked stories:\n%s",
