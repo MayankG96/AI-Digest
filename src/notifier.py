@@ -13,7 +13,8 @@ logger = logging.getLogger(__name__)
 
 def send_telegram_notification() -> None:
     """
-    Sends a short Telegram message notifying the user their digest is ready.
+    Sends a short Telegram ping notifying the user their digest email is ready.
+    No story content — just a prompt to check their inbox and send a voice note.
     """
     token = os.environ.get("TELEGRAM_BOT_TOKEN")
     chat_id = os.environ.get("TELEGRAM_CHAT_ID")

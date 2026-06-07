@@ -2,11 +2,12 @@
 main.py — Orchestrates the full AI News Digest pipeline.
 
 Steps:
-  1. Load environment variables (from .env for local dev, from shell/CI for prod)
-  2. Fetch AI news from all sources
-  3. Rank and summarise the top 7 stories with the LLM
-  4. Build the HTML email
-  5. Send the email via Gmail SMTP
+  1. Fetch AI news from all sources
+  2. Rank and summarise the top 7 stories with Gemini
+  3. Build the HTML email
+  4. Send the email via Gmail SMTP
+  5. Send Telegram notification (digest is ready ping)
+  6. Save ranked stories to Supabase
 """
 
 import logging
@@ -48,7 +49,7 @@ def main() -> None:
     # ------------------------------------------------------------------
     # 2. Fetch news
     # ------------------------------------------------------------------
-    logger.info("Step 1/4 · Fetching news from all sources…")
+    logger.info("Step 1/6 · Fetching news from all sources…")
     try:
         items = fetch_all_items()
     except Exception as exc:
@@ -67,7 +68,7 @@ def main() -> None:
     # ------------------------------------------------------------------
     # 3. Rank & summarise
     # ------------------------------------------------------------------
-    logger.info("Step 2/4 · Ranking and summarising with LLM…")
+    logger.info("Step 2/6 · Ranking and summarising with LLM…")
     try:
         ranked_items = rank_and_summarize(items)
     except Exception as exc:
@@ -86,7 +87,7 @@ def main() -> None:
     # ------------------------------------------------------------------
     # 4. Build HTML email
     # ------------------------------------------------------------------
-    logger.info("Step 3/4 · Building HTML email…")
+    logger.info("Step 3/6 · Building HTML email…")
     try:
         html_body = build_email_html(ranked_items, today_full)
     except Exception as exc:
@@ -99,7 +100,7 @@ def main() -> None:
     # ------------------------------------------------------------------
     # 5. Send email
     # ------------------------------------------------------------------
-    logger.info("Step 4/4 · Sending email via Gmail SMTP…")
+    logger.info("Step 4/6 · Sending email via Gmail SMTP…")
     try:
         send_email(html_body, subject)
     except EnvironmentError as exc:
