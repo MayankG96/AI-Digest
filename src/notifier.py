@@ -1,5 +1,5 @@
 """
-notifier.py — Sends a Telegram notification summarising the top 3 digest stories.
+notifier.py — Sends a short Telegram ping when the digest email is ready.
 Failure is non-fatal: the email was already sent before this is called.
 """
 
